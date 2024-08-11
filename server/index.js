@@ -1,10 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
+const cors = require("cors");
+
 const TelegramBot = require("node-telegram-bot-api");
 dotenv.config();
 const token = process.env.TELEGRAM_API;
 const app = express();
+app.use(cors());
 const PORT = 3000;
 app.use(express.json());
 
@@ -59,11 +62,18 @@ bot.on("message", async (msg) => {
   }
 });
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-  console.log("hit /");
+app.get("/api/data", async (req, res) => {
+  try {
+    const data = await Data.find();
+    res.json(data);
+    console.log("Data sent successfully");
+  } catch (error) {
+    console.error("Detailed error:", error);
+    res
+      .status(500)
+      .json({ error: "Failed to fetch data", details: error.message });
+  }
 });
-
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
